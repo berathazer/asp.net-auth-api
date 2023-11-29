@@ -15,5 +15,7 @@ namespace Auth.Business.Abstract
 
         Task<User> GetUserByUsername(string username);
 
+        string? AuthenticateUser(User user);
+
     }
 }

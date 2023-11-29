@@ -3,14 +3,16 @@ using Auth.Business.Concrete;
 using Auth.DataAccess.Abstract;
 using Auth.Entities;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.API.Controllers
 {
-    [Route("api/user")]
+    [Route("api/users")]
     [ApiController]
+
     public class UserController : ControllerBase
     {
         IUserService _userService;
@@ -22,6 +24,7 @@ namespace Auth.API.Controllers
 
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
       
@@ -44,6 +47,7 @@ namespace Auth.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] User user) 
         
         {
@@ -53,8 +57,13 @@ namespace Auth.API.Controllers
 
                 if(_user != null && BCrypt.Net.BCrypt.EnhancedVerify(user.password, _user.password)) {
 
+                    var token = _userService.AuthenticateUser(user);
 
-                    return Ok("jwt-token");
+                    return Ok(new
+                    {
+                        username = user.username,
+                        token = token
+                    });
                 }
                 else
                 {
